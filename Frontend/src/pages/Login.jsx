@@ -113,8 +113,10 @@ function Login() {
           <div className="hidden lg:flex lg:col-span-2 flex-col justify-center space-y-8 p-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-orange-400/60 text-sm font-medium tracking-wider">
-                <Sparkles className="w-4 h-4" />
-                <span>WELCOME BACK</span>
+                <Link to={"/"}>
+                  <Sparkles className="w-4 h-4" />
+                  <span>WELCOME BACK</span>
+                </Link>
               </div>
               <h2 className="text-4xl font-bold leading-tight">
                 Continue Your

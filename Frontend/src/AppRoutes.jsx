@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 import "./app.css";
 import StockDetails from "./pages/StockDetails";
 import SignUp from "./pages/signup";
+import OtpVerify from "./components/Auth/OtpVerify";
 
 
 export default function AppRoutes() {
@@ -20,6 +21,10 @@ export default function AppRoutes() {
       <Route
         path="/forgot-password"
         element={<ForgotPassword />}
+      />
+      <Route
+        path="/otp-verify"
+        element={<OtpVerify />}
       />
 
       <Route path="*" element={<NotFound />} />

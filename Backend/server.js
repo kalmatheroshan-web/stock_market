@@ -1,26 +1,25 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const dotenv = require("dotenv");
-const cors = require("cors");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import dotenv from "dotenv";
+import cors from "cors";
 
-const connectDB = require("./config/mongodb");
+import connectDB from "./config/mongodb.js";
 
-const authRoutes = require("./routes/authRoutes");
-const stockRoutes = require("./routes/stockRoutes");
-const watchlistRoutes = require("./routes/watchlistRoutes");
-const portfolioRoutes = require('./routes/portfolioRoutes');
+import authRoutes from "./routes/authRoutes.js";
+import stockRoutes from "./routes/stockRoutes.js";
+import watchlistRoutes from "./routes/watchlistRoutes.js";
+import portfolioRoutes from "./routes/portfolioRoutes.js";
 
-const setupSocket = require("./sockets/socketServer");
-const startFinnhubSocket = require('./sockets/startFinnhubSocket');
+import setupSocket from "./sockets/socketServer.js";
+import startFinnhubSocket from "./sockets/startFinnhubSocket.js";
 
 dotenv.config();
 
-const app = express();
-const server = http.createServer(app);
-
 // Connect Database
 connectDB();
+const app = express();
+const server = http.createServer(app);
 
 // Middleware
 app.use(cors({

@@ -26,7 +26,7 @@ function StockDetails() {
 
         const chart = createChart(chartContainerRef.current, {
             width: chartContainerRef.current.clientWidth,
-            height: Math.min(480, window.innerHeight - 380),
+            height: Math.min(480, window.innerHeight - 300),
             layout: {
                 background: { color: "transparent" },
                 textColor: "#d4c5b8",
@@ -377,14 +377,6 @@ function StockDetails() {
                         <span className="flex items-center gap-1">
                             <Shield className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
                             <span className="hidden xs:inline">Encrypted</span>
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[8px] sm:text-[10px] text-orange-400/20 font-mono tracking-widest">
-                        <span>✦ WEBSOCKET</span>
-                        <span className="w-px h-3 bg-orange-500/10" />
-                        <span className="flex items-center gap-1">
-                            <Globe className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
-                            <span className="hidden xs:inline">LIVE</span>
                         </span>
                     </div>
                 </div>

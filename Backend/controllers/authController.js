@@ -1,7 +1,7 @@
-const Otp = require('./models/Otp');
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-const User = require("../dbs/Users");
+import Otp from "../dbs/Otp.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../dbs/Users.js";
 
 export const sign_up = async (req, res) => {
     try {
@@ -41,6 +41,7 @@ export const sign_up = async (req, res) => {
 
         // Respond with success (don't send OTP in response for security)
         res.status(201).json({
+            success: true,
             message: 'User created successfully. Please verify your email with the OTP sent.',
             userId: user._id,
         });
@@ -93,6 +94,7 @@ export const login = async (req, res) => {
         // --- 4. (Optional) Check if email is verified ---
         if (!user.emailVerified) {
             return res.status(403).json({
+                success: false,
                 message: 'Please verify your email address before logging in',
                 needsVerification: true,
                 email: user.email,

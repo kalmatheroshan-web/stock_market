@@ -1,5 +1,5 @@
-const express = require('express');
+import express from "express";
 const portfolioRoutes = express.Router();
 
 
-module.exports = portfolioRoutes; 
+export default portfolioRoutes; 

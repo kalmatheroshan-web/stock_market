@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Eye, EyeOff, Mail, Lock, ArrowRight, Loader2, CheckCircle,
     AlertCircle, User, Shield, Sparkles, Fingerprint, Globe,
     TrendingUp, ArrowLeft, Zap, Award, BarChart3, Users,
     Check, X, Star
 } from 'lucide-react';
+import { signup } from "../services/auth";
 
 function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +21,7 @@ function SignUp() {
         number: false,
         special: false,
     });
+    const navigate = useNavigate(); 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -124,6 +126,9 @@ function SignUp() {
             setIsLoading(false);
             setSuccess(true);
             console.log('Sign up successful!', formData);
+            (async () => {
+                await signup(formData,navigate);
+            })();
             setTimeout(() => setSuccess(false), 3000);
         }, 1500);
     };
@@ -295,8 +300,7 @@ function SignUp() {
                                     {/* Header */}
                                     <div className="text-center mb-6">
                                         <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-200 via-orange-300 to-orange-400 bg-clip-text text-transparent">
-                                            Create Account
-                                        </h1>
+                                            Create Account                                             </h1>
                                         <p className="text-orange-400/30 text-sm mt-1">
                                             Start your 14-day free trial today
                                         </p>
@@ -576,21 +580,23 @@ function SignUp() {
                                  disabled:opacity-70 disabled:cursor-not-allowed
                                  disabled:hover:scale-100
                                  overflow-hidden group">
-                                            <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 
+                                            <Link to={"/otp-verify"} state={formData}>
+                                                <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 
                                          opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
                                          translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                                            {isLoading ? (
-                                                <>
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                    <span>Creating Account...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>Create Account</span>
-                                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                                </>
-                                            )}
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span>Creating Account...</span>
+                                                    </>
+                                                ) : (
+                                                    <div className='flex items-center gap-2'>
+                                                        <span>Create Account</span>
+                                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    </div>
+                                                )}
+                                            </Link>
                                         </button>
                                     </form>
 

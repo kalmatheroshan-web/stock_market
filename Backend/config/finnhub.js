@@ -1,4 +1,4 @@
-const WebSocket = require("ws");
+import WebSocket from "ws";
 require('dotenv').config();
 
 const API_KEY = process.env.FINNHUB_API_KEY;

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const crypto = require('crypto');
-
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+ 
 const otpSchema = new mongoose.Schema(
   {
     // ---------- Target user ----------
@@ -51,11 +51,10 @@ const otpSchema = new mongoose.Schema(
 );
 
 // ---------- TTL Index: automatically remove expired documents ----------
-otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 
 // ---------- Pre‑save: hash OTP (optional but recommended) ----------
-const bcrypt = require('bcryptjs');
-
 otpSchema.pre('save', async function (next) {
   // Only hash if OTP is modified or new
   if (!this.isModified('otp')) return next();
@@ -116,5 +115,4 @@ otpSchema.statics.createOtp = async function ({
 
 // ---------- Create Model ----------
 const Otp = mongoose.model('Otp', otpSchema);
-
-module.exports = Otp;
+export default Otp;

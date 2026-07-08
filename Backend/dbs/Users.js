@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import bcrypt from "bcrypt"; 
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,7 +37,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'INR',
       uppercase: true,
-      enum: ['USD', 'EUR', 'GBP', 'JPY','INR'], // expand as needed
+      enum: ['USD', 'EUR', 'GBP', 'JPY', 'INR'], // expand as needed
     },
 
     // ---------- Portfolio (holdings) ----------
@@ -157,14 +158,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ---------- Indexes for Performance ----------
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ 'portfolio.symbol': 1 });
-userSchema.index({ 'watchlist.symbol': 1 });
+// userSchema.index({ email: 1 });
+// userSchema.index({ username: 1 });
+// userSchema.index({ 'portfolio.symbol': 1 });
+// userSchema.index({ 'watchlist.symbol': 1 });
 
 // ---------- Pre-save Hook: Hash Password ----------
-const bcrypt = require('bcryptjs');
-
 userSchema.pre('save', async function (next) {
   // Only hash if password is modified (or new)
   if (!this.isModified('password')) return next();
@@ -187,4 +186,4 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 // Important: Use mongoose.model (not new)
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+export default User;

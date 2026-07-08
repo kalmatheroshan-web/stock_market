@@ -8,10 +8,12 @@ import {
 } from 'lucide-react';
 import { Link } from "react-router-dom";
 import Navbar from './Navbar';
+import toast from 'react-hot-toast';
 
 function Home() {
   const [scrolled, setScrolled] = useState(false);
   const particlesRef = useRef(null);
+
 
   // Market data simulation
   const [marketData] = useState([

@@ -1,60 +1,60 @@
-const { WebSocketServer } = require("ws");
+import { WebSocketServer } from "ws";
 
 const UPDATE_INTERVAL = 500; // 500ms for smooth updates
 
 // Initial stock data with realistic prices and volatility
 const stocks = {
-    AAPL: { 
-        price: 178.50, 
+    AAPL: {
+        price: 178.50,
         volatility: 0.15,
         trend: 0.02,
         volume: 1250000,
         name: "Apple Inc."
     },
-    TSLA: { 
-        price: 245.60, 
+    TSLA: {
+        price: 245.60,
         volatility: 0.35,
         trend: -0.01,
         volume: 890000,
         name: "Tesla Inc."
     },
-    NVDA: { 
-        price: 875.40, 
+    NVDA: {
+        price: 875.40,
         volatility: 0.50,
         trend: 0.05,
         volume: 1500000,
         name: "NVIDIA Corporation"
     },
-    MSFT: { 
-        price: 415.20, 
+    MSFT: {
+        price: 415.20,
         volatility: 0.12,
         trend: 0.03,
         volume: 980000,
         name: "Microsoft Corporation"
     },
-    GOOGL: { 
-        price: 142.80, 
+    GOOGL: {
+        price: 142.80,
         volatility: 0.18,
         trend: -0.02,
         volume: 760000,
         name: "Alphabet Inc."
     },
-    AMZN: { 
-        price: 185.30, 
+    AMZN: {
+        price: 185.30,
         volatility: 0.22,
         trend: 0.01,
         volume: 820000,
         name: "Amazon.com Inc."
     },
-    META: { 
-        price: 512.90, 
+    META: {
+        price: 512.90,
         volatility: 0.28,
         trend: 0.04,
         volume: 650000,
         name: "Meta Platforms Inc."
     },
-    NFLX: { 
-        price: 625.30, 
+    NFLX: {
+        price: 625.30,
         volatility: 0.32,
         trend: -0.03,
         volume: 540000,
@@ -75,48 +75,48 @@ function generatePriceUpdate(symbol, stock) {
     const randomShock = (Math.random() - 0.5) * stock.volatility * 0.5;
     const trendComponent = stock.trend * 0.3;
     const noise = (Math.random() - 0.5) * 0.2;
-    
+
     // Calculate percentage change
     const changePercent = (trendComponent + randomShock + noise) / 100;
     const newPrice = stock.price * (1 + changePercent);
-    
+
     // Add some mean reversion
     const meanReversion = (178.50 - newPrice) * 0.001; // Slight pull to mean
-    
+
     let finalPrice = newPrice + meanReversion;
-    
+
     // Ensure price doesn't go negative
     finalPrice = Math.max(5, finalPrice);
-    
+
     // Round to 2 decimal places
     finalPrice = parseFloat(finalPrice.toFixed(2));
-    
+
     // Update price history
     priceHistory[symbol].push(finalPrice);
     if (priceHistory[symbol].length > 100) {
         priceHistory[symbol].shift();
     }
-    
+
     // Calculate change from previous price
     const previousPrice = priceHistory[symbol][priceHistory[symbol].length - 2] || stock.price;
     const change = finalPrice - previousPrice;
     const changePercentDisplay = parseFloat(((change / previousPrice) * 100).toFixed(2));
-    
+
     // Update stock object
     stock.price = finalPrice;
     stock.change = parseFloat(change.toFixed(2));
     stock.changePercent = changePercentDisplay;
-    
+
     // Add some random volume variation
     stock.volume = Math.floor(stock.volume * (0.95 + Math.random() * 0.1));
-    
+
     return stock;
 }
 
 // Generate price alerts occasionally
 function generatePriceAlert(symbol, price, changePercent) {
     const alerts = [];
-    
+
     // Significant movement alert
     if (Math.abs(changePercent) > 3) {
         alerts.push({
@@ -126,7 +126,7 @@ function generatePriceAlert(symbol, price, changePercent) {
             severity: Math.abs(changePercent) > 5 ? "HIGH" : "MEDIUM"
         });
     }
-    
+
     // Price milestone alerts
     if (price > 1000 && priceHistory[symbol][priceHistory[symbol].length - 2] < 1000) {
         alerts.push({
@@ -136,7 +136,7 @@ function generatePriceAlert(symbol, price, changePercent) {
             severity: "HIGH"
         });
     }
-    
+
     return alerts;
 }
 
@@ -153,16 +153,16 @@ function startFinnhubSocket(io) {
     // Simulate market movement
     setInterval(() => {
         updateCount++;
-        
+
         // Update all stocks
         Object.entries(stocks).forEach(([symbol, stock]) => {
             const updatedStock = generatePriceUpdate(symbol, stock);
             stocks[symbol] = updatedStock;
-            
+
             // Check for alerts
             const newAlerts = generatePriceAlert(symbol, updatedStock.price, updatedStock.changePercent);
             alerts.push(...newAlerts);
-            
+
             // Keep only recent alerts
             if (alerts.length > 50) {
                 alerts = alerts.slice(-50);
@@ -383,5 +383,4 @@ function startFinnhubSocket(io) {
 
     return wss;
 }
-
-module.exports = startFinnhubSocket;
+export default startFinnhubSocket;

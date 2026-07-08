@@ -1,6 +1,6 @@
-const express = require('express');
+import express from "express";
 const watchlistRoutes = express.Router();
 
 
 
-module.exports = watchlistRoutes; 
+export default watchlistRoutes; 

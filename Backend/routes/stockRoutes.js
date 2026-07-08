@@ -1,5 +1,5 @@
-const express = require('express');
+import express from "express"; 
 const stockRoutes = express.Router();
 
 
-module.exports = stockRoutes; 
+export default stockRoutes; 

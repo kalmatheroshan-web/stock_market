@@ -1,4 +1,4 @@
 function setupSocket() {
-    
+
 }
-module.exports = setupSocket; 
+export default setupSocket; 
