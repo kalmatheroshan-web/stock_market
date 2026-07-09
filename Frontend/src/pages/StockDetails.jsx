@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createChart, CandlestickSeries } from "lightweight-charts";
 import { useLocation, Link } from "react-router-dom";
-import { ArrowLeft, TrendingUp, TrendingDown, BarChart3, Activity, DollarSign, Clock, Zap, Shield, Globe } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, BarChart3, Activity, DollarSign, Clock, Zap, Shield } from "lucide-react";
 
 function StockDetails() {
     const chartContainerRef = useRef(null);
@@ -24,9 +24,13 @@ function StockDetails() {
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
-        const chart = createChart(chartContainerRef.current, {
-            width: chartContainerRef.current.clientWidth,
-            height: Math.min(480, window.innerHeight - 300),
+        const container = chartContainerRef.current;
+        // Use a larger height to fill the viewport
+        const height = Math.max(380, window.innerHeight - 460);
+
+        const chart = createChart(container, {
+            width: container.clientWidth,
+            height: height,
             layout: {
                 background: { color: "transparent" },
                 textColor: "#d4c5b8",
@@ -76,9 +80,9 @@ function StockDetails() {
             wickDownColor: "#ff4500",
             borderColor: "#ff8c00",
         });
-
         candlestickSeriesRef.current = candlestickSeries;
 
+        // Generate historical data (unchanged)
         let baseTime = Math.floor(Date.now() / 1000) - 300;
         let historicalData = [];
         let startingPrice = stock?.price || 178.50;
@@ -100,19 +104,28 @@ function StockDetails() {
         }
         candlestickSeries.setData(historicalData);
 
+        // 🔥 Focus on the last 80 candles so they are clearly visible
+        const totalCandles = historicalData.length;
+        const visibleCandles = Math.min(80, totalCandles);
+        const fromIndex = totalCandles - visibleCandles;
+        const fromTime = historicalData[fromIndex].time;
+        const toTime = historicalData[totalCandles - 1].time;
+        chart.timeScale().setVisibleRange({ from: fromTime, to: toTime });
+
+        // Update session stats
         const allHighs = historicalData.map(c => c.high);
         const allLows = historicalData.map(c => c.low);
         setSessionHigh(Math.max(...allHighs));
         setSessionLow(Math.min(...allLows));
         currentCandleRef.current = { ...historicalData[historicalData.length - 1] };
 
+        // WebSocket connection (unchanged)
         let reconnectAttempts = 0;
         const maxReconnectAttempts = 5;
 
         const connectWebSocket = () => {
             try {
                 ws.current = new WebSocket("ws://localhost:8080");
-
                 ws.current.onopen = () => {
                     setIsConnected(true);
                     reconnectAttempts = 0;
@@ -121,17 +134,14 @@ function StockDetails() {
                         symbol: stock.symbol
                     }));
                 };
-
                 ws.current.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-
                         switch (data.type) {
                             case "subscribed":
                                 setPrice(data.price);
                                 setPreviousPrice(data.price);
                                 break;
-
                             case "trade":
                                 const tradePrice = data.price;
                                 setPrice((currentPrice) => {
@@ -166,7 +176,6 @@ function StockDetails() {
                                     candlestickSeriesRef.current.update(currentCandleRef.current);
                                 }
                                 break;
-
                             case "market-update":
                                 if (data.stocks && data.stocks[stock.symbol]) {
                                     const stockData = data.stocks[stock.symbol];
@@ -176,7 +185,6 @@ function StockDetails() {
                                     setLastUpdate(new Date());
                                 }
                                 break;
-
                             default:
                                 if (data.price) {
                                     setPrice(data.price);
@@ -187,7 +195,6 @@ function StockDetails() {
                         console.error("Error processing message:", error);
                     }
                 };
-
                 ws.current.onclose = () => {
                     setIsConnected(false);
                     if (reconnectAttempts < maxReconnectAttempts) {
@@ -195,7 +202,6 @@ function StockDetails() {
                         setTimeout(connectWebSocket, 2000 * reconnectAttempts);
                     }
                 };
-
                 ws.current.onerror = (error) => {
                     console.error("WebSocket error:", error);
                     ws.current?.close();
@@ -204,13 +210,15 @@ function StockDetails() {
                 console.error("Failed to connect:", error);
             }
         };
-
         connectWebSocket();
 
+        // Resize handler: only resize, do NOT change zoom level
         const handleResize = () => {
-            if (chartContainerRef.current) {
-                const newHeight = Math.min(480, window.innerHeight - 380);
-                chart.resize(chartContainerRef.current.clientWidth, newHeight);
+            if (chartContainerRef.current && chartRef.current) {
+                const newWidth = chartContainerRef.current.clientWidth;
+                const newHeight = Math.max(380, window.innerHeight - 460);
+                chartRef.current.resize(newWidth, newHeight);
+                // We don't call fitContent() – the user's zoom level is preserved
             }
         };
         window.addEventListener("resize", handleResize);
@@ -226,19 +234,20 @@ function StockDetails() {
                 }
                 ws.current.close();
             }
-            if (chart) {
-                chart.remove();
+            if (chartRef.current) {
+                chartRef.current.remove();
             }
         };
     }, [stock.symbol]);
 
+    // Price change calculation (unchanged)
     const priceDiff = price - previousPrice;
     const isPositive = priceDiff >= 0;
     const priceChangePercent = previousPrice === 0 ? 0 : (priceDiff / previousPrice) * 100;
 
     return (
         <div className="min-h-screen w-full bg-[#0a0807] text-white">
-            {/* Single subtle background glow */}
+            {/* Background effects */}
             <div className="fixed inset-0 bg-gradient-to-br from-[#1a1410] via-[#0a0807] to-[#0d0b0a] pointer-events-none" />
             <div className="fixed top-[-30%] right-[-20%] w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="fixed bottom-[-30%] left-[-20%] w-[400px] h-[400px] bg-orange-600/3 rounded-full blur-[100px] pointer-events-none" />
@@ -351,11 +360,13 @@ function StockDetails() {
                     </div>
                 </div>
 
-                {/* Chart Container */}
+                {/* Chart Container – now with proper zoom-in */}
                 <div className="relative rounded-2xl overflow-hidden bg-[#0a0807] border border-orange-500/10">
-                    <div ref={chartContainerRef} className="w-full" style={{ height: '420px', minHeight: '300px' }} />
-
-                    {/* Chart Overlay */}
+                    <div
+                        ref={chartContainerRef}
+                        className="w-full"
+                        style={{ minHeight: '380px', height: 'calc(100vh - 460px)' }}
+                    />
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
                         <div className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-[#0a0807]/80 backdrop-blur-sm border border-orange-500/10">
                             <Zap className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-orange-400/50" />

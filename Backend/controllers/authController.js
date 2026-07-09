@@ -178,8 +178,6 @@ export const login = async (req, res) => {
             });
         }
 
-
-
         // --- 5. Update last login ---
         user.lastLogin = new Date();
         await user.save({ validateBeforeSave: false });

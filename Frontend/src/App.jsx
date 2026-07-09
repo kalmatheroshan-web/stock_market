@@ -10,14 +10,10 @@ function App() {
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (user && !hasFetched.current) {
-      hasFetched.current = true;
-      dispatch(me());
-    }
-  }, [user, dispatch]);
+    dispatch(me());
+  }, [dispatch]);
 
   return (
     <>

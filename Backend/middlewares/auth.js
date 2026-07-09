@@ -4,8 +4,6 @@ import User from "../dbs/Users.js";
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.cookies.token;
-        console.log(req.cookies.token); //undifine
-        console.log(req.headers.cookie); //undefine
         if (!token) {
             return res.status(200).json({
                 success: false,
