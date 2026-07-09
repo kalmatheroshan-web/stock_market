@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
-import "./app.css";
+import "./App.css";
 import StockDetails from "./pages/StockDetails";
 import SignUp from "./pages/signup";
 import OtpVerify from "./components/Auth/OtpVerify";

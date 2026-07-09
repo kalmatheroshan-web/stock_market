@@ -26,7 +26,7 @@ const server = http.createServer(app);
 // ----- Middleware -----
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // populates req.cookies
+app.use(cookieParser());
 
 app.use(
     cors({
