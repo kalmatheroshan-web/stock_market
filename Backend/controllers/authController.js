@@ -1,11 +1,95 @@
-import Otp from "../dbs/Otp.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../dbs/Users.js";
+import Otp from "../dbs/Otp.js";
+import sendEmail from "../utils/sendEmail.js";
+import mail from "../config/mail.js";
+import { nonnegative } from "zod";
+
+export const sendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const { otp } = await Otp.createOtp({
+            email,
+            purpose: "verify_email",
+            ipAddress: req.ip,
+            userAgent: req.get("user-agent"),
+        });
+
+        await sendEmail(
+            email,
+            "OTP Verification",
+            otp,
+            mail(otp)
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "OTP sent successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        const otpDoc = await Otp.findOne({
+            email,
+            purpose: "verify_email",
+        });
+        if (!otpDoc) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP not found or expired",
+            });
+        }
+
+        if (otpDoc.expiresAt < new Date()) {
+            await Otp.deleteOne({ _id: otpDoc._id });
+
+            return res.status(400).json({
+                success: false,
+                message: "OTP has expired",
+            });
+        }
+
+        const isMatch = await otpDoc.compareOtp(otp);
+
+        if (!isMatch) {
+            otpDoc.attempts += 1;
+            await otpDoc.save();
+
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP",
+            });
+        }
+
+        // OTP verified successfully
+        await Otp.deleteOne({ _id: otpDoc._id });
+
+        res.status(200).json({
+            success: true,
+            message: "OTP verified successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 
 export const sign_up = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { name: username, email, password } = req.body;
 
         // Basic validation
         if (!username || !email || !password) {
@@ -62,24 +146,17 @@ export const sign_up = async (req, res) => {
     }
 };
 
-
-
 export const login = async (req, res) => {
     try {
-        const { email, username, password } = req.body;
+        const { email, password } = req.body;
 
         // --- 1. Validate input ---
-        if ((!email && !username) || !password) {
-            return res.status(400).json({ message: 'Email/Username and password are required' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
         }
 
         // --- 2. Find user by email or username ---
-        const user = await User.findOne({
-            $or: [
-                { email: email?.toLowerCase() },
-                { username },
-            ],
-        }).select('+password'); // include password field (hidden by default)
+        const user = await User.findOne({ email: email?.toLowerCase() }).select('+password');
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -101,9 +178,11 @@ export const login = async (req, res) => {
             });
         }
 
+
+
         // --- 5. Update last login ---
         user.lastLogin = new Date();
-        await user.save({ validateBeforeSave: false }); // avoid re‑hashing password
+        await user.save({ validateBeforeSave: false });
 
         // --- 6. Generate JWT ---
         const token = jwt.sign(
@@ -114,15 +193,16 @@ export const login = async (req, res) => {
                 role: user.role || 'user',
             },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' } // adjust as needed
+            { expiresIn: '7d' }
         );
 
         // --- 7. Set HTTP‑only cookie ---
-        res.cookie('token', token, {
+        res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'lax', // CSRF protection
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            secure: false,
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+            path: "/",
         });
 
         // --- 8. Send user data (exclude password) ---
@@ -130,6 +210,7 @@ export const login = async (req, res) => {
         delete userData.password; // remove password even though it's selected
 
         res.status(200).json({
+            success: true,
             message: 'Login successful',
             user: userData,
         });
@@ -141,8 +222,28 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-    // Clear cookie or token
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid credentials",
+        });
+    }
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+    });
 };
+
 
 export const getProfile = async (req, res) => {
     // Return logged-in user

@@ -4,7 +4,7 @@ import {
   Menu, X, ChevronDown, ArrowRight, Award, Sparkles,
   LineChart, PieChart, Users, Clock, CheckCircle,
   ExternalLink, Moon, Sun, Bell, User, Settings,
- Link as Github,Link as Twitter,Link as Youtube, Mail, Phone, MapPin
+  Link as Github, Link as Twitter, Link as Youtube, Mail, Phone, MapPin
 } from 'lucide-react';
 import { Link } from "react-router-dom";
 import Navbar from './Navbar';
@@ -13,8 +13,7 @@ import toast from 'react-hot-toast';
 function Home() {
   const [scrolled, setScrolled] = useState(false);
   const particlesRef = useRef(null);
-
-
+ 
   // Market data simulation
   const [marketData] = useState([
     { symbol: 'AAPL', price: 178.50, change: 2.35, changePercent: 1.34 },

@@ -2,9 +2,11 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const AUTH_API = {
     SIGN_UP: `${BASE_URL}/api/auth/signup`,
+    ME: `${BASE_URL}/api/auth/me`,
     LOGIN: `${BASE_URL}/api/auth/login`,
     LOGOUT: `${BASE_URL}/api/auth/logout`,
-    REFRESH_TOKEN: `${BASE_URL}/api/auth/refresh-token`,
+    SEND_OTP: `${BASE_URL}/api/auth/send-otp`,
+    VERIFY_OTP: `${BASE_URL}/api/auth/verify-otp`,
     VERIFY_EMAIL: `${BASE_URL}/api/auth/verify-email`,
     RESEND_VERIFICATION: `${BASE_URL}/api/auth/resend-verification`,
     FORGOT_PASSWORD: `${BASE_URL}/api/auth/forgot-password`,

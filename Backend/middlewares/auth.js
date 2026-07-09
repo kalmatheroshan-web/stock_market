@@ -1,25 +1,23 @@
-const jwt = require("jsonwebtoken");
-const User = require("../dbs/User");
+import jwt from "jsonwebtoken";
+import User from "../dbs/Users.js";
 
-const auth = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     try {
-        // Get token from Authorization header
-        const authHeader = req.header("Authorization");
-
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({
+        const token = req.cookies.token;
+        console.log(req.cookies.token); //undifine
+        console.log(req.headers.cookie); //undefine
+        if (!token) {
+            return res.status(200).json({
                 success: false,
-                message: "Access denied. No token provided.",
+                msg : "hello",
+                token: req.cookie.token,
+                header: req.headers.cookie,
+                message: "No token provided.",
             });
         }
 
-        // Extract token
-        const token = authHeader.split(" ")[1];
-
-        // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Get user (excluding password)
         const user = await User.findById(decoded.id).select("-password");
 
         if (!user) {
@@ -40,4 +38,4 @@ const auth = async (req, res, next) => {
     }
 };
 
-module.exports = auth;
+export default authMiddleware;

@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import AppRoutes from "./AppRoutes";
 import toast, { Toaster } from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { me } from './services/auth';
+import { useEffect } from 'react';
+import { useRef } from 'react';
 
 function App() {
+
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (user && !hasFetched.current) {
+      hasFetched.current = true;
+      dispatch(me());
+    }
+  }, [user, dispatch]);
 
   return (
     <>
 
       <Toaster
-        position="top-center"   
+        position="top-center"
         toastOptions={{
           className: '!bg-[#2a1f1a]/80 !backdrop-blur-md !border !border-orange-400/30 !rounded-2xl !shadow-[0_8px_32px_rgba(255,140,0,0.2)] !shadow-orange-500/20',
           style: {

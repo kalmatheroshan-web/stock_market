@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
- 
+
 const otpSchema = new mongoose.Schema(
   {
     // ---------- Target user ----------
@@ -55,22 +55,16 @@ const otpSchema = new mongoose.Schema(
 
 
 // ---------- Pre‑save: hash OTP (optional but recommended) ----------
-otpSchema.pre('save', async function (next) {
-  // Only hash if OTP is modified or new
-  if (!this.isModified('otp')) return next();
+otpSchema.pre("save", async function () {
+  if (!this.isModified("otp")) return;
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.otp = await bcrypt.hash(this.otp, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+  const salt = await bcrypt.genSalt(10);
+  this.otp = await bcrypt.hash(this.otp, salt);
 });
 
 // ---------- Instance method: compare plain OTP with stored hash ----------
 otpSchema.methods.compareOtp = async function (plainOtp) {
-  return bcrypt.compare(plainOtp, this.otp);
+  return await bcrypt.compare(plainOtp, this.otp);
 };
 
 // ---------- Static method: generate a new OTP ----------
@@ -87,20 +81,19 @@ otpSchema.statics.generateOtp = function (length = 6) {
 // ---------- Static method: create a new OTP document ----------
 otpSchema.statics.createOtp = async function ({
   email,
-  purpose = 'verify_email',
-  expiresInMinutes = 10,
+  purpose = "verify_email",
+  expiresInSeconds = 60,
   ipAddress,
   userAgent,
 }) {
-  // Delete any existing OTP for same email & purpose (optional)
   await this.deleteMany({ email, purpose });
 
   const plainOtp = this.generateOtp();
-  const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+  const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
 
   const otpDoc = new this({
     email,
-    otp: plainOtp, // will be hashed in pre‑save
+    otp: plainOtp,
     purpose,
     expiresAt,
     ipAddress,
@@ -109,7 +102,6 @@ otpSchema.statics.createOtp = async function ({
 
   await otpDoc.save();
 
-  // Return the plain OTP (to send via email/SMS) and the document
   return { otp: plainOtp, doc: otpDoc };
 };
 

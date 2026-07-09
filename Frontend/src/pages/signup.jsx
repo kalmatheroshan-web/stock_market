@@ -21,7 +21,7 @@ function SignUp() {
         number: false,
         special: false,
     });
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -122,13 +122,11 @@ function SignUp() {
         setIsLoading(true);
         setSuccess(false);
 
-        setTimeout(() => {
-            setIsLoading(false);
+        setTimeout(async () => {
+            console.log('Sign up successful!!!!!!', formData);
+            await signup(formData,navigate);
             setSuccess(true);
-            console.log('Sign up successful!', formData);
-            (async () => {
-                await signup(formData,navigate);
-            })();
+            setIsLoading(false);
             setTimeout(() => setSuccess(false), 3000);
         }, 1500);
     };
@@ -580,24 +578,22 @@ function SignUp() {
                                  disabled:opacity-70 disabled:cursor-not-allowed
                                  disabled:hover:scale-100
                                  overflow-hidden group">
-                                            <Link to={"/otp-verify"} state={formData}>
-                                                <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 
+                                            <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 
                                          opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
                                          translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                                                {isLoading ? (
-                                                    <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                        <span>Creating Account...</span>
-                                                    </>
-                                                ) : (
-                                                    <div className='flex items-center gap-2'>
-                                                        <span>Create Account</span>
-                                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                                    </div>
-                                                )}
-                                            </Link>
-                                        </button>
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    <span>Creating Account...</span>
+                                                </>
+                                            ) : (
+                                                <div className='flex items-center gap-2'>
+                                                    <span>Create Account</span>
+                                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                </div>
+                                            )}
+                                   ``     </button>
                                     </form>
 
                                     {/* Divider */}

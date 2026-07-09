@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from "bcrypt"; 
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -147,7 +147,7 @@ const userSchema = new mongoose.Schema(
     // For email verification, 2FA, etc.
     emailVerified: {
       type: Boolean,
-      default: false,
+      default: true,//check it must be false
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
@@ -164,26 +164,22 @@ const userSchema = new mongoose.Schema(
 // userSchema.index({ 'watchlist.symbol': 1 });
 
 // ---------- Pre-save Hook: Hash Password ----------
-userSchema.pre('save', async function (next) {
-  // Only hash if password is modified (or new)
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
 
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
   } catch (error) {
-    next(error);
+    throw error;
   }
 });
-
 // ---------- Instance Method: Compare Password ----------
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 // ---------- Create Model ----------
-// Important: Use mongoose.model (not new)
 const User = mongoose.model('User', userSchema);
 
 export default User;

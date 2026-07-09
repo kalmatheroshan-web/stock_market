@@ -1,9 +1,9 @@
-async function sendEmail(email, subject, text = "", html = "") {
+export default async function sendEmail(email, subject, otp, html = "", text = "") {
     const data = {
         sender: { name: 'Fikri Shop', email: "kalmatheroshan@gmail.com" },
         to: [{ email }],
         subject,
-        htmlContent: html || text  
+        htmlContent: html || text || mail(otp)
     };
 
     try {
@@ -22,12 +22,10 @@ async function sendEmail(email, subject, text = "", html = "") {
         }
 
         const result = await response.json();
-        console.log("Email sent!", result);
+        console.log("Email sent to", email);
         return result;
     } catch (err) {
         console.error("API Error:", err.message);
         throw err;
     }
 }
-
-export default sendEmail; 

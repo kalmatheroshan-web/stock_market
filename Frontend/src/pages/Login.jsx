@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from "react-router-dom";
+import { data, Link, useNavigate } from "react-router-dom";
 import {
   Eye, EyeOff, Mail, Lock, ArrowRight, Loader2, CheckCircle,
   AlertCircle, Shield, Fingerprint, Sparkles, Zap, Award,
   BarChart3, Users, TrendingUp, Globe, ArrowLeft
 } from 'lucide-react';
+import { login } from '../services/auth';
+import { useDispatch } from "react-redux";
+
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +19,10 @@ function Login() {
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [touched, setTouched] = useState({});
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const cardRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
 
@@ -72,12 +79,20 @@ function Login() {
     setIsLoading(true);
     setSuccess(false);
 
-    setTimeout(() => {
+    try {
+      await dispatch(login({ email, password }, navigate));
+
+      setTimeout(() => {
+        setIsLoading(false);
+        setSuccess(true);
+
+        setTimeout(() => setSuccess(false), 3000);
+      }, 1500);
+    } catch (err) {
       setIsLoading(false);
-      setSuccess(true);
-      console.log('Login successful!', { email, password, rememberMe });
-      setTimeout(() => setSuccess(false), 3000);
-    }, 1500);
+      setSuccess(false);
+      console.error("Login failed:", err);
+    }
   };
 
   const handleBlur = (field) => {

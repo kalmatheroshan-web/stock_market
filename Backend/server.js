@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import connectDB from "./config/mongodb.js";
 
@@ -18,19 +19,37 @@ dotenv.config();
 
 // Connect Database
 connectDB();
+
 const app = express();
 const server = http.createServer(app);
 
-// Middleware
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-}));
-
+// ----- Middleware -----
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // populates req.cookies
 
-// Routes
+app.use(
+    cors({
+        origin: true, // your frontend origin
+        credentials: true,               // required for cookies
+    })
+);
+
+// Optional: log incoming cookies for debugging
+app.use((req, res, next) => {
+    console.log('Cookie header:', req.headers.cookie); // should show token after proxy
+    next();
+});
+
+// ----- Socket.IO -----
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        credentials: true,
+    },
+});
+
+// ----- Routes -----
 app.use("/api/auth", authRoutes);
 app.use("/api/stocks", stockRoutes);
 app.use("/api/watchlist", watchlistRoutes);
@@ -38,29 +57,15 @@ app.use("/api/portfolio", portfolioRoutes);
 
 // Health Check
 app.get("/", (req, res) => {
-    res.json({
-        success: true,
-        message: "Stock Market API Running 🚀",
-    });
+    res.json({ success: true, message: "Stock Market API Running 🚀" });
 });
 
-// Socket.IO
-const io = new Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL,
-        credentials: true,
-    },
-});
-
-// Setup Socket.IO
+// ----- Socket Setup -----
 setupSocket(io);
-
-// Start Finnhub WebSocket
 startFinnhubSocket(io);
 
-// Start Server
+// ----- Start Server -----
 const PORT = process.env.PORT || 5000;
-
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
