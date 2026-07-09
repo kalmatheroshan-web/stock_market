@@ -1,17 +1,8 @@
-# stock tracker 
-Tech stack : 
-    ```
-        frontend : react\n 
-        backend : node\n
-        db : mongodb
-    ```
-    cd ../frontend
+Stock market
+step 1
+#### cd ../frontend
+#### npm install 
 
-# Install dependencies
-npm install
-
-# Create .env (optional)
-cp .env.example .env
-
-# Start development server
-npm start
+step 2
+#### cd ../backend
+#### npm install 
