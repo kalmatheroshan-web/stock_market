@@ -30,7 +30,7 @@ app.use(cookieParser()); // populates req.cookies
 
 app.use(
     cors({
-        origin: true, // your frontend origin
+        origin: process.env.CLIENT_URL, // your frontend origin
         credentials: true,               // required for cookies
     })
 );
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 // ----- Socket.IO -----
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: process.env.CLIENT_URL,
         credentials: true,
     },
 });
