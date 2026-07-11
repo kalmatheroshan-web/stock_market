@@ -17,7 +17,6 @@ function Home() {
   const particlesRef = useRef(null);
   const { user } = useSelector(state => state.auth);
 
-  // Market data simulation (same as before)
   const [marketData] = useState([
     { symbol: 'AAPL', price: 178.50, change: 2.35, changePercent: 1.34 },
     { symbol: 'GOOGL', price: 142.80, change: -1.20, changePercent: -0.83 },
@@ -66,13 +65,7 @@ function Home() {
       canvas.height = parent.clientHeight;
     };
 
-    class Particle {
-      constructor() { /* ... same as before ... */ }
-      // ... (keep particle code from original)
-    }
-
-    // (particle code unchanged)
-    // ... 
+  
 
     return () => {
       cancelAnimationFrame(animationFrameId);
